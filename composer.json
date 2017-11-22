@@ -18,5 +18,12 @@
             "Qbhy\\Repository\\": "src"
         }
     },
-    "license": "MIT"
+    "license": "MIT",
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Qbhy\\Repository\\Providers\\RepositoryServiceProvider"
+            ]
+        }
+    }
 }
