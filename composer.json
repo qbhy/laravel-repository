@@ -1,0 +1,22 @@
+{
+    "name": "96qbhy/laravel-repository",
+    "description": "简单的 laravel 仓库模式扩展包。",
+    "authors": [
+        {
+            "name": "96qbhy",
+            "email": "96qbhy@gmail.com",
+            "homepage": "https://96qbhy.com"
+        }
+    ],
+    "require-dev": {
+        "laravel/laravel": "^5.5"
+    },
+    "require": {
+    },
+    "autoload": {
+        "psr-4": {
+            "Qbhy\\Repository\\": "src"
+        }
+    },
+    "license": "MIT"
+}
