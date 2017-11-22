@@ -18,7 +18,6 @@ class RepositoryServiceProvider extends ServiceProvider
 
     }
 
-
     /**
      * Register any application services.
      *
@@ -29,6 +28,26 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->commands([
             RepositoryCommand::class,
         ]);
+
+        $this->bindRepositories();
+
+    }
+
+    public function bindRepositories(): void
+    {
+        $repositories = [];
+        $dir_name = app_path('Repositories');
+
+        foreach (glob($dir_name . '/*Repository.php') as $filename) {
+            $name = str_replace($dir_name . '/', "", $filename);
+            $repositories[] = 'App\\Repositories\\' . str_replace(".php", "", $name);
+        }
+
+        foreach ($repositories as $repository) {
+            $this->app->singleton($repository, function ($app) use ($repository) {
+                return new $repository();
+            });
+        }
     }
 
 }
