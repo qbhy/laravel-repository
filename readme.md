@@ -3,6 +3,7 @@ laravel 仓库模式扩展包
 
 ## 需要
 * php 版本 >= 7.0
+* cache driver in ["memcached", "redis"]
 
 ## 安装
 ```bash
