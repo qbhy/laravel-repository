@@ -1,0 +1,13 @@
+<?php
+
+namespace App\Repositories;
+
+use Qbhy\Repository\Repository as QbhyRepository;
+
+class Repository extends QbhyRepository
+{
+
+   // some thing
+
+
+}

@@ -44,7 +44,7 @@ class RepositoryCommand extends Command
         $model_name = $this->argument('model_name') ? $this->argument('model_name') : $name;
         $cache_prefix = $this->argument('cache_prefix') ? $this->argument('cache_prefix') : $name . '_id:';
 
-        $content = File::get(__DIR__ . '/../ExampleRepository');
+        $content = File::get(__DIR__ . '/../../tmp/ExampleRepository');
         $content = str_replace("{class}", $class, $content);
         $content = str_replace("{model}", $model, $content);
         $content = str_replace("{model_name}", $model_name, $content);
@@ -52,6 +52,18 @@ class RepositoryCommand extends Command
 
         File::put(app_path("Repositories/$class.php"), $content);
 
-        $this->info('Create file success !');
+        $this->info('Create repository success !');
+    }
+
+    public function publishBaseRepository()
+    {
+        $target = app_path("Repositories/Repository.php");
+
+        if (!File::exists($target)) {
+
+            File::copy(__DIR__ . '/../../tmp/ExampleRepository', $target);
+
+            $this->info('Create base repository file success !');
+        }
     }
 }
