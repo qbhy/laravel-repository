@@ -5,6 +5,8 @@ namespace Qbhy\Repository\Providers;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
 use Qbhy\Repository\Commands\RepositoryCommand;
+use Illuminate\Foundation\Application as LaravelApplication;
+use Laravel\Lumen\Application as LumenApplication;
 
 class RepositoryServiceProvider extends ServiceProvider
 {
@@ -25,12 +27,33 @@ class RepositoryServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+
+        $this->setupConfig();
+
+        if (config('repository.auto_bind', true)) {
+            $this->bindRepositories();
+        }
+
+    }
+
+    /**
+     * Setup the config.
+     */
+    protected function setupConfig()
+    {
+        $configSource = realpath(__DIR__ . '/../config.php');
+        if ($this->app instanceof LaravelApplication && $this->app->runningInConsole()) {
+            $this->publishes([
+                $configSource => config_path('repository.php')
+            ]);
+        } elseif ($this->app instanceof LumenApplication) {
+            $this->app->configure('repository');
+        }
+        $this->mergeConfigFrom($configSource, 'repository');
+
         $this->commands([
             RepositoryCommand::class,
         ]);
-
-        $this->bindRepositories();
-
     }
 
     public function bindRepositories(): void
