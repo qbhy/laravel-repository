@@ -72,7 +72,7 @@ class RepositoryCommand extends Command
 
         if (!File::exists($target)) {
 
-            File::copy(__DIR__ . '/../../tmp/ExampleRepository', $target);
+            File::copy(__DIR__ . '/../../tmp/Repository', $target);
 
             $this->info('Create base repository file success !');
         }
