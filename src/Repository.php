@@ -29,7 +29,7 @@ abstract class Repository implements RepositoryInterface
      * 缓存实例
      * @var \Illuminate\Cache\TaggedCache
      */
-    protected $cache;
+    protected $cache = null;
 
     /**
      * 缓存标签
@@ -44,10 +44,16 @@ abstract class Repository implements RepositoryInterface
         'id'
     ];
 
-    function __construct()
+    /**
+     * @return \Illuminate\Cache\TaggedCache
+     */
+    public function getTaggedCache(): \Illuminate\Cache\TaggedCache
     {
-        $tags = count($this->tags) > 0 ? $this->tags : [static::CACHE_PREFIX];
-        $this->cache = Cache::tags($tags);
+        if (is_null($this->cache)) {
+            $tags = count($this->tags) > 0 ? $this->tags : [static::CACHE_PREFIX];
+            $this->cache = Cache::tags($tags);
+        }
+        return $this->cache;
     }
 
     /**
@@ -66,7 +72,7 @@ abstract class Repository implements RepositoryInterface
      */
     public function flushCache(): void
     {
-        $this->cache->flush();
+        $this->getTaggedCache()->flush();
     }
 
     /**
@@ -138,7 +144,7 @@ abstract class Repository implements RepositoryInterface
 
         $id = is_integer($model) ? $model : $model->id;
         $cache_key = static::getCacheKey($id);
-        $data = $this->cache->get($cache_key);
+        $data = $this->getTaggedCache()->get($cache_key);
 
         if (is_null($data)) {
             $model = $id === $model ? $this->find($id) : $model;
@@ -146,7 +152,7 @@ abstract class Repository implements RepositoryInterface
                 return null;
             }
             $data = $this->format($model);
-            $this->cache->forever($cache_key, $data);
+            $this->getTaggedCache()->forever($cache_key, $data);
         }
 
         $data = $this->bind($data, $model);
@@ -170,7 +176,7 @@ abstract class Repository implements RepositoryInterface
      */
     public function removeCache($model): bool
     {
-        return $this->cache->forget($this->getCacheKey($model));
+        return $this->getTaggedCache()->forget($this->getCacheKey($model));
     }
 
     /**
