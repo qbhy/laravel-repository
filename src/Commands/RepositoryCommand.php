@@ -24,7 +24,6 @@ class RepositoryCommand extends Command
     /**
      * Create a new command instance.
      *
-     * @return void
      */
     public function __construct()
     {
@@ -34,16 +33,24 @@ class RepositoryCommand extends Command
     /**
      * Execute the console command.
      *
-     * @return mixed
      */
-    public function handle()
+    public function handle(): void
     {
         $name = $this->argument('name');
+
+        $filename = $name . 'Repository';
+
+        $dirs = explode('/', $name);
+
+        $name = array_pop($dirs);
+
         $class = $name . 'Repository';
 
-        if (File::exists(app_path("Repositories/$class.php"))) {
+        $has_dir = $this->createDirs($dirs);
 
-            $this->error("$class exists !");
+        if (File::exists(app_path("Repositories/$filename.php"))) {
+
+            $this->error("$filename exists !");
 
         } else {
 
@@ -52,12 +59,25 @@ class RepositoryCommand extends Command
             $cache_prefix = $this->argument('cache_prefix') ? $this->argument('cache_prefix') : $name . '_id:';
 
             $content = File::get(__DIR__ . '/../../tmp/ExampleRepository');
+
+            if ($has_dir) {
+                $content = str_replace("{namespace}", "\\" . implode("\\", $dirs), $content);
+            } else {
+                $content = str_replace("{namespace}", "", $content);
+            }
+
+            if ($has_dir) {
+                $content = str_replace("{use}", PHP_EOL . "use App\\Repositories\\Repository;" . PHP_EOL, $content);
+            } else {
+                $content = str_replace("{use}", "", $content);
+            }
+
             $content = str_replace("{class}", $class, $content);
             $content = str_replace("{model}", $model, $content);
             $content = str_replace("{model_name}", $model_name, $content);
             $content = str_replace("{cache_prefix}", $cache_prefix, $content);
 
-            File::put(app_path("Repositories/$class.php"), $content);
+            File::put(app_path("Repositories/$filename.php"), $content);
 
             $this->publishBaseRepository();
 
@@ -66,7 +86,22 @@ class RepositoryCommand extends Command
 
     }
 
-    public function publishBaseRepository()
+    public function createDirs(array $dirs): bool
+    {
+        if ($dirs) {
+            $dir = implode('/', $dirs);
+            $dir = app_path("Repositories/$dir");
+
+            if (count($dirs) > 0 && !File::exists($dir)) {
+                File::makeDirectory($dir);
+            }
+            return true;
+        }
+
+        return false;
+    }
+
+    public function publishBaseRepository(): void
     {
         $target = app_path("Repositories/Repository.php");
 

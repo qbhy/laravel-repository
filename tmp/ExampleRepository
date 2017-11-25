@@ -1,7 +1,7 @@
 <?php
 
-namespace App\Repositories;
-
+namespace App\Repositories{namespace};
+{use}
 class {class} extends Repository
 {
     const CACHE_PREFIX = '{cache_prefix}';
