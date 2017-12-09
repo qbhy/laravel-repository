@@ -23,9 +23,9 @@ interface RepositoryInterface
 
     /**
      * @param $model
-     * @return array
+     * @return array|null
      */
-    public function getDataFromCache($model): array;
+    public function getDataFromCache($model);
 
     /**
      * @param $model

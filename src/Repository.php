@@ -134,9 +134,9 @@ abstract class Repository implements RepositoryInterface
 
     /**
      * @param int|Model|null $model
-     * @return array
+     * @return array|null
      */
-    public function getDataFromCache($model): array
+    public function getDataFromCache($model)
     {
         if (is_null($model)) {
             return null;
