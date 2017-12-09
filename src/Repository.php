@@ -128,7 +128,7 @@ abstract class Repository implements RepositoryInterface
      */
     static public function getCacheKey($model): string
     {
-        $id = is_integer($model) ? $model : $model->id;
+        $id = is_numeric($model) ? $model : $model->id;
         return static::CACHE_PREFIX . $id;
     }
 
@@ -142,7 +142,7 @@ abstract class Repository implements RepositoryInterface
             return null;
         }
 
-        $id = is_integer($model) ? $model : $model->id;
+        $id = is_numeric($model) ? $model : $model->id;
         $cache_key = static::getCacheKey($id);
         $data = $this->getTaggedCache()->get($cache_key);
 
