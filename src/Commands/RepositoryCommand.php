@@ -48,7 +48,7 @@ class RepositoryCommand extends Command
 
         $has_dir = $this->createDirs($dirs);
 
-        if (File::exists(app_path("Repositories/$filename.php"))) {
+        if (File::exists(base_path("app/Repositories/$filename.php"))) {
 
             $this->error("$filename exists !");
 
@@ -77,7 +77,7 @@ class RepositoryCommand extends Command
             $content = str_replace("{model_name}", $model_name, $content);
             $content = str_replace("{cache_prefix}", $cache_prefix, $content);
 
-            File::put(app_path("Repositories/$filename.php"), $content);
+            File::put(base_path("app/Repositories/$filename.php"), $content);
 
             $this->publishBaseRepository();
 
@@ -90,7 +90,7 @@ class RepositoryCommand extends Command
     {
         if ($dirs) {
             $dir = implode('/', $dirs);
-            $dir = app_path("Repositories/$dir");
+            $dir = base_path("app/Repositories/$dir");
 
             if (count($dirs) > 0 && !File::exists($dir)) {
                 File::makeDirectory($dir);
@@ -103,7 +103,7 @@ class RepositoryCommand extends Command
 
     public function publishBaseRepository(): void
     {
-        $target = app_path("Repositories/Repository.php");
+        $target = base_path("app/Repositories/Repository.php");
 
         if (!File::exists($target)) {
 
