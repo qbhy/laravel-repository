@@ -41,10 +41,12 @@ abstract class Repository implements RepositoryInterface
      * @var array
      */
     protected $fillable = [
-        'id'
+        'id',
     ];
 
     /**
+     * 获取标签缓存器
+     *
      * @return \Illuminate\Cache\TaggedCache
      */
     public function getTaggedCache(): \Illuminate\Cache\TaggedCache
@@ -57,6 +59,8 @@ abstract class Repository implements RepositoryInterface
     }
 
     /**
+     * 格式化待缓存的数据
+     *
      * @param Model $model
      * @return array
      */
@@ -76,6 +80,8 @@ abstract class Repository implements RepositoryInterface
     }
 
     /**
+     * 后期模型绑定
+     *
      * @param array $data
      * @param Model|int $model
      * @return array
@@ -86,6 +92,8 @@ abstract class Repository implements RepositoryInterface
     }
 
     /**
+     * 从数据库中获取模型
+     *
      * @param int $id
      * @return Model|null
      */
@@ -96,6 +104,8 @@ abstract class Repository implements RepositoryInterface
     }
 
     /**
+     * 获取列表
+     *
      * @param $list
      * @return array
      */
@@ -109,6 +119,8 @@ abstract class Repository implements RepositoryInterface
     }
 
     /**
+     * 格式化成分页
+     *
      * @param LengthAwarePaginator $paginate
      * @return array
      */
@@ -123,6 +135,8 @@ abstract class Repository implements RepositoryInterface
     }
 
     /**
+     * 获取缓存的 key
+     *
      * @param $model
      * @return string
      */
@@ -133,6 +147,8 @@ abstract class Repository implements RepositoryInterface
     }
 
     /**
+     * 优先从缓存中获取数据
+     *
      * @param int|Model|null $model
      * @return array|null
      */
