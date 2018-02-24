@@ -4,6 +4,7 @@ namespace Qbhy\Repository\Commands;
 
 use Illuminate\Console\Command;
 use File;
+use Illuminate\Filesystem\Filesystem;
 
 class RepositoryCommand extends Command
 {
@@ -21,6 +22,9 @@ class RepositoryCommand extends Command
      */
     protected $description = 'Command description';
 
+    /** @var Filesystem  */
+    protected $files;
+
     /**
      * Create a new command instance.
      *
@@ -28,6 +32,7 @@ class RepositoryCommand extends Command
     public function __construct()
     {
         parent::__construct();
+        $this->files = app('files');
     }
 
     /**
@@ -48,7 +53,7 @@ class RepositoryCommand extends Command
 
         $has_dir = $this->createDirs($dirs);
 
-        if (File::exists(base_path("app/Repositories/$filename.php"))) {
+        if ($this->files->exists(base_path("app/Repositories/$filename.php"))) {
 
             $this->error("$filename exists !");
 
@@ -58,7 +63,7 @@ class RepositoryCommand extends Command
             $model_name = $this->argument('model_name') ? $this->argument('model_name') : $name;
             $cache_prefix = $this->argument('cache_prefix') ? $this->argument('cache_prefix') : $name . '_id:';
 
-            $content = File::get(__DIR__ . '/../../tmp/ExampleRepository');
+            $content = $this->files->get(__DIR__ . '/../../tmp/ExampleRepository');
 
             if ($has_dir) {
                 $content = str_replace("{namespace}", "\\" . implode("\\", $dirs), $content);
@@ -77,7 +82,7 @@ class RepositoryCommand extends Command
             $content = str_replace("{model_name}", $model_name, $content);
             $content = str_replace("{cache_prefix}", $cache_prefix, $content);
 
-            File::put(base_path("app/Repositories/$filename.php"), $content);
+            $this->files->put(base_path("app/Repositories/$filename.php"), $content);
 
             $this->publishBaseRepository();
 
@@ -92,8 +97,8 @@ class RepositoryCommand extends Command
             $dir = implode('/', $dirs);
             $dir = base_path("app/Repositories/$dir");
 
-            if (count($dirs) > 0 && !File::exists($dir)) {
-                File::makeDirectory($dir);
+            if (count($dirs) > 0 && !$this->files->exists($dir)) {
+                $this->files->makeDirectory($dir);
             }
             return true;
         }
@@ -105,9 +110,9 @@ class RepositoryCommand extends Command
     {
         $target = base_path("app/Repositories/Repository.php");
 
-        if (!File::exists($target)) {
+        if (!$this->files->exists($target)) {
 
-            File::copy(__DIR__ . '/../../tmp/Repository', $target);
+            $this->files->copy(__DIR__ . '/../../tmp/Repository', $target);
 
             $this->info('Create base repository file success !');
         }
