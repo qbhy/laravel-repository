@@ -66,9 +66,13 @@ abstract class Repository implements RepositoryInterface
      */
     public function format($model): array
     {
-        return $model->only(
-            $this->fillable
-        );
+        if($this->fillable){
+            return $model->only(
+                $this->fillable
+            );
+        }
+
+        return $model->toArray();
     }
 
     /**
