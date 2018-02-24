@@ -44,7 +44,7 @@ class RepositoryServiceProvider extends ServiceProvider
         $configSource = realpath(__DIR__ . '/../config.php');
         if ($this->app instanceof LaravelApplication && $this->app->runningInConsole()) {
             $this->publishes([
-                $configSource => config_path('repository.php')
+                $configSource => base_path('config/repository.php')
             ]);
         } elseif ($this->app instanceof LumenApplication) {
             $this->app->configure('repository');
@@ -59,7 +59,7 @@ class RepositoryServiceProvider extends ServiceProvider
     public function bindRepositories(): void
     {
         $repositories = [];
-        $dir_name = app_path('Repositories');
+        $dir_name = base_path('app/Repositories');
 
         foreach (glob($dir_name . '/*Repository.php') as $filename) {
             $name = str_replace($dir_name . '/', "", $filename);
