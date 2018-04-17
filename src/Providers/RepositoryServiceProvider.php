@@ -69,8 +69,7 @@ class RepositoryServiceProvider extends ServiceProvider
 
         foreach ($repositories as $repository) {
             $this->app->singleton($repository, function ($app) use ($repository) {
-                /** @var Repository $repository */
-                return $repository::getInstance();
+                return new $repository();
             });
         }
     }
