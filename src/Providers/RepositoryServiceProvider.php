@@ -7,6 +7,7 @@ use Illuminate\Support\ServiceProvider;
 use Qbhy\Repository\Commands\RepositoryCommand;
 use Illuminate\Foundation\Application as LaravelApplication;
 use Laravel\Lumen\Application as LumenApplication;
+use Qbhy\Repository\Repository;
 
 class RepositoryServiceProvider extends ServiceProvider
 {
@@ -44,7 +45,7 @@ class RepositoryServiceProvider extends ServiceProvider
         $configSource = realpath(__DIR__ . '/../config.php');
         if ($this->app instanceof LaravelApplication && $this->app->runningInConsole()) {
             $this->publishes([
-                $configSource => base_path('config/repository.php')
+                $configSource => base_path('config/repository.php'),
             ]);
         } elseif ($this->app instanceof LumenApplication) {
             $this->app->configure('repository');
@@ -59,16 +60,17 @@ class RepositoryServiceProvider extends ServiceProvider
     public function bindRepositories(): void
     {
         $repositories = [];
-        $dir_name = base_path('app/Repositories');
+        $dir_name     = base_path('app/Repositories');
 
         foreach (glob($dir_name . '/*Repository.php') as $filename) {
-            $name = str_replace($dir_name . '/', "", $filename);
+            $name           = str_replace($dir_name . '/', "", $filename);
             $repositories[] = 'App\\Repositories\\' . str_replace(".php", "", $name);
         }
 
         foreach ($repositories as $repository) {
             $this->app->singleton($repository, function ($app) use ($repository) {
-                return new $repository();
+                /** @var Repository $repository */
+                return $repository::getInstance();
             });
         }
     }

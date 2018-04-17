@@ -2,14 +2,12 @@
 
 namespace Qbhy\Repository;
 
-use Cache;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 abstract class Repository implements RepositoryInterface
 {
-
     /**
      * 缓存前缀
      */
@@ -40,9 +38,21 @@ abstract class Repository implements RepositoryInterface
     /**
      * @var array
      */
-    protected $fillable = [
-        'id',
-    ];
+    protected $fillable = [];
+
+    protected $primary_key = 'id';
+
+    /** @var static */
+    protected static $instance;
+
+    public static function getInstance()
+    {
+        if (is_null(static::$instance)) {
+            static::$instance = new static();
+        }
+
+        return static::$instance;
+    }
 
     /**
      * 获取标签缓存器
@@ -53,8 +63,10 @@ abstract class Repository implements RepositoryInterface
     {
         if (is_null($this->cache)) {
             $tags = count($this->tags) > 0 ? $this->tags : [static::CACHE_PREFIX];
-            $this->cache = Cache::tags($tags);
+
+            $this->cache = app('cache.store')->tags($tags);
         }
+
         return $this->cache;
     }
 
@@ -62,17 +74,30 @@ abstract class Repository implements RepositoryInterface
      * 格式化待缓存的数据
      *
      * @param Model $model
+     *
      * @return array
      */
     public function format($model): array
     {
-        if($this->fillable){
+        if ($this->fillable) {
             return $model->only(
                 $this->fillable
             );
         }
 
         return $model->toArray();
+    }
+
+    /**
+     * @param string $primary_key
+     *
+     * @return $this
+     */
+    public function setPrimaryKey(string $primary_key)
+    {
+        $this->primary_key = $primary_key;
+
+        return $this;
     }
 
     /**
@@ -86,8 +111,9 @@ abstract class Repository implements RepositoryInterface
     /**
      * 后期模型绑定
      *
-     * @param array $data
+     * @param array     $data
      * @param Model|int $model
+     *
      * @return array
      */
     public function bind(array $data, $model): array
@@ -99,18 +125,22 @@ abstract class Repository implements RepositoryInterface
      * 从数据库中获取模型
      *
      * @param int $id
+     *
      * @return Model|null
      */
-    public function find(int $id)
+    public function find($id)
     {
+        /** @var Model $class */
         $class = static::MODEL;
-        return $class::find($id);
+
+        return $class::query()->where($this->primary_key, $id)->first();
     }
 
     /**
      * 获取列表
      *
      * @param $list
+     *
      * @return array
      */
     public function formatList($list): array
@@ -119,6 +149,7 @@ abstract class Repository implements RepositoryInterface
         foreach ($list as $item) {
             $results[] = $this->getDataFromCache($item);
         }
+
         return $results;
     }
 
@@ -126,15 +157,16 @@ abstract class Repository implements RepositoryInterface
      * 格式化成分页
      *
      * @param LengthAwarePaginator $paginate
+     *
      * @return array
      */
     public function formatPaginate($paginate): array
     {
         return [
-            'page' => $paginate->currentPage(),
+            'page'      => $paginate->currentPage(),
             'page_size' => $paginate->perPage(),
-            'total' => $paginate->total(),
-            'list' => $this->formatList($paginate)
+            'total'     => $paginate->total(),
+            'list'      => $this->formatList($paginate),
         ];
     }
 
@@ -142,18 +174,28 @@ abstract class Repository implements RepositoryInterface
      * 获取缓存的 key
      *
      * @param $model
+     *
      * @return string
      */
-    static public function getCacheKey($model): string
+    public static function getCacheKey($model): string
     {
-        $id = is_numeric($model) ? $model : $model->id;
-        return static::CACHE_PREFIX . $id;
+        $key = static::getModelKey($model);
+
+        return static::CACHE_PREFIX . $key;
+    }
+
+    protected static function getModelKey($model): string
+    {
+        $key = $model instanceof Model ? $model->{static::getInstance()->primary_key} : $model;
+
+        return $key;
     }
 
     /**
      * 优先从缓存中获取数据
      *
-     * @param int|Model|null $model
+     * @param string|Model|null $model
+     *
      * @return array|null
      */
     public function getDataFromCache($model)
@@ -162,12 +204,13 @@ abstract class Repository implements RepositoryInterface
             return null;
         }
 
-        $id = is_numeric($model) ? $model : $model->id;
-        $cache_key = static::getCacheKey($id);
-        $data = $this->getTaggedCache()->get($cache_key);
+        $key = $this->getModelKey($model);
+
+        $cache_key = static::getCacheKey($key);
+        $data      = $this->getTaggedCache()->get($cache_key);
 
         if (is_null($data)) {
-            $model = $id === $model ? $this->find($id) : $model;
+            $model = $key === $model ? $this->find($key) : $model;
             if (is_null($model)) {
                 return null;
             }
@@ -182,16 +225,19 @@ abstract class Repository implements RepositoryInterface
 
     /**
      * @param $model
+     *
      * @return array
      */
     public function updateCache($model): array
     {
         $this->removeCache($model);
+
         return $this->getDataFromCache($model);
     }
 
     /**
      * @param $model
+     *
      * @return bool
      */
     public function removeCache($model): bool
@@ -200,11 +246,12 @@ abstract class Repository implements RepositoryInterface
     }
 
     /**
-     * @param int $id
-     * @return Model
-     * @throws ModelNotFoundException
+     * @param        $id
+     * @param string $field
+     *
+     * @return Model|mixed|null
      */
-    public function findOrFail(int $id)
+    public function findOrFail($id)
     {
         $model = $this->find($id);
 
@@ -213,6 +260,29 @@ abstract class Repository implements RepositoryInterface
         }
 
         return $model;
+    }
+
+    /**
+     * @param $model
+     *
+     * @return array
+     */
+    public function formatData($model)
+    {
+        $data = $this->format($model);
+
+        return $this->bindWithoutCache($data, $model);
+    }
+
+    /**
+     * @param array $data
+     * @param       $model
+     *
+     * @return array
+     */
+    public function bindWithoutCache(array $data, $model)
+    {
+        return $this->bind($data, $model);
     }
 
 }

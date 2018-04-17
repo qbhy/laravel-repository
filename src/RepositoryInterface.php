@@ -7,72 +7,77 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 interface RepositoryInterface
 {
-
     /**
      * @param $model
+     *
      * @return array
      */
     public function format($model): array;
 
     /**
      * @param array $data
-     * @param $model
+     * @param       $model
+     *
      * @return array
      */
     public function bind(array $data, $model): array;
 
     /**
      * @param $model
-     * @return array|null
+     *
+     * @return mixed
      */
     public function getDataFromCache($model);
 
     /**
      * @param $model
+     *
      * @return bool
      */
     public function removeCache($model): bool;
 
     /**
      * @param $model
+     *
      * @return array
      */
     public function updateCache($model): array;
 
     /**
      * @param $model
+     *
      * @return string
      */
-    static public function getCacheKey($model): string;
+    public static function getCacheKey($model): string;
 
     /**
      * @param $paginate
+     *
      * @return array
      */
     public function formatPaginate($paginate): array;
 
     /**
      * @param $list
+     *
      * @return array
      */
     public function formatList($list): array;
 
     /**
-     * @param int $id
-     * @return Model|null
+     * @param $id
+     *
+     * @return mixed
      */
-    public function find(int $id);
+    public function find($id);
 
     /**
-     * @param int $id
-     * @return Model
-     * @throws ModelNotFoundException
+     * @param $id
+     *
+     * @return mixed
      */
-    public function findOrFail(int $id);
+    public function findOrFail($id);
 
-    /**
-     * 清空仓库缓存
-     */
     public function flushCache(): void;
 
 }
