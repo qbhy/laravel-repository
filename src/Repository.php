@@ -181,14 +181,14 @@ abstract class Repository implements RepositoryInterface
      */
     public static function getCacheKey($model): string
     {
-        $key = static::getModelKey($model);
+        $key = app(static::class)->getModelKey($model);
 
         return static::CACHE_PREFIX . $key;
     }
 
-    protected static function getModelKey($model): string
+    public function getModelKey($model): string
     {
-        $key = $model instanceof Model ? $model->{static::getInstance()->primary_key} : $model;
+        $key = $model instanceof Model ? $model->{$this->primary_key} : $model;
 
         return $key;
     }
