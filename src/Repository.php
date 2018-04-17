@@ -44,18 +44,6 @@ abstract class Repository implements RepositoryInterface
 
     protected $use_cache = true;
 
-    /** @var static */
-    protected static $instance;
-
-    public static function getInstance()
-    {
-        if (is_null(static::$instance)) {
-            static::$instance = new static();
-        }
-
-        return static::$instance;
-    }
-
     /**
      * 获取标签缓存器
      *
