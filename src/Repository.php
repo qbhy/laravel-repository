@@ -42,6 +42,8 @@ abstract class Repository implements RepositoryInterface
 
     protected $primary_key = 'id';
 
+    protected $use_cache = true;
+
     /** @var static */
     protected static $instance;
 
@@ -147,10 +149,22 @@ abstract class Repository implements RepositoryInterface
     {
         $results = [];
         foreach ($list as $item) {
-            $results[] = $this->getDataFromCache($item);
+            $results[] = $this->use_cache ? $this->getDataFromCache($item) : $this->formatData($item);
         }
 
         return $results;
+    }
+
+    /**
+     * @param bool $use_cache
+     *
+     * @return $this
+     */
+    public function setUseCache(bool $use_cache)
+    {
+        $this->use_cache = $use_cache;
+
+        return $this;
     }
 
     /**
@@ -166,7 +180,7 @@ abstract class Repository implements RepositoryInterface
             'page'      => $paginate->currentPage(),
             'page_size' => $paginate->perPage(),
             'total'     => $paginate->total(),
-            'list'      => $this->formatList($paginate),
+            'list'      => $this->formatList($paginate->items()),
         ];
     }
 
