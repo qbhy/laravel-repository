@@ -212,7 +212,7 @@ abstract class Repository implements RepositoryInterface
         $data      = $this->getTaggedCache()->get($cache_key);
 
         if (is_null($data)) {
-            $model = $key === $model ? $this->find($key) : $model;
+            $model = is_object($model) ? $model : $this->find($key);
             if (is_null($model)) {
                 return null;
             }
